@@ -8,20 +8,35 @@ class MoviesController < ApplicationController
 
   def index
     sortAttr = params[:sortBy]
+    if sortAttr == nil
+      sortAttr = session[:sortAttr]
+    else
+      session[:sortAttr] = sortAttr
+    end
+    
     @highlight = {:title => nil, :release_date => nil}
     if params[:ratings]
       @movies = Movie.find(:all, :conditions=>{rating: params[:ratings].keys},:order=>sortAttr) 
       @all_ratings = {'G'=> true, 'PG'=>true, 'PG-13'=>true, 'R'=>true}
+      allUnchecked = true
       @all_ratings.keys.each {|checkedRating|
         if !(params[:ratings].keys.include?(checkedRating))
           @all_ratings[checkedRating] = false
         else
           @all_ratings[checkedRating] = true
+          allUnchecked = false
         end
       }
+      if allUnchecked
+        @all_ratings = session[:ratings]
+      end
+      session[:ratings] = @all_ratings
     else
-      @all_ratings = {'G'=> true, 'PG'=>true, 'PG-13'=>true, 'R'=>true}
-      @movies = Movie.find(:all, :order=>sortAttr)
+      @all_ratings = session[:ratings]
+      if !@all_ratings
+        @all_ratings = {'G'=> true, 'PG'=>true, 'PG-13'=>true, 'R'=>true}
+      end
+      @movies = Movie.find(:all,:conditions=> {rating: @all_ratings.keys}, :order=>sortAttr)
     end
     if sortAttr
       if sortAttr == 'title'
