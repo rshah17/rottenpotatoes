@@ -7,11 +7,11 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @all_ratings = {'G'=> true, 'PG'=>true, 'PG-13'=>true, 'R'=>true}
     sortAttr = params[:sortBy]
     @highlight = {:title => nil, :release_date => nil}
     if params[:ratings]
       @movies = Movie.find(:all, :conditions=>{rating: params[:ratings].keys},:order=>sortAttr) 
+      @all_ratings = {'G'=> true, 'PG'=>true, 'PG-13'=>true, 'R'=>true}
       @all_ratings.keys.each {|checkedRating|
         if !(params[:ratings].keys.include?(checkedRating))
           @all_ratings[checkedRating] = false
@@ -20,6 +20,7 @@ class MoviesController < ApplicationController
         end
       }
     else
+      @all_ratings = {'G'=> true, 'PG'=>true, 'PG-13'=>true, 'R'=>true}
       @movies = Movie.find(:all, :order=>sortAttr)
     end
     if sortAttr
